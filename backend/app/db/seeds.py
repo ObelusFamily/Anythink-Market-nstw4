@@ -20,7 +20,7 @@ comment_statement = text("""INSERT INTO comments(body, seller_id, item_id) VALUE
 letters = string.ascii_lowercase
 
 with engine.connect() as con:
-    for i in range(10):
+    for i in range(100):
 
         random_username = ''.join(random.choice(letters) for i in range(10))
         user = {'username': random_username, 'email':f'{random_username}@mail.com', 'salt': 'abc', 'bio': 'bio', 'hashed_password':'12345689'}
