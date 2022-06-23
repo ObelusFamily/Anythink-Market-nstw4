@@ -1,4 +1,3 @@
 #!/bin/sh
 
-poetry shell
-python ./app/db/seeds.py
+python3 ./app/db/seeds.py
