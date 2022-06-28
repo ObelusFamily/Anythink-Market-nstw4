@@ -123,17 +123,9 @@ class ItemsRepository(BaseRepository):  # noqa: WPS214
             items.description,
             items.body,
             items.image,
+            items.seller_id,
             items.created_at,
             items.updated_at,
-            Query.from_(
-                users,
-            ).where(
-                users.id == items.seller_id,
-            ).select(
-                users.username,
-            ).as_(
-                SELLER_USERNAME_ALIAS,
-            ),
         )
         # fmt: on
 
@@ -204,15 +196,21 @@ class ItemsRepository(BaseRepository):  # noqa: WPS214
 
         items_rows = await self.connection.fetch(query.get_sql(), *query_params)
 
-        return [
-            await self._get_item_from_db_record(
-                item_row=item_row,
-                slug=item_row[SLUG_ALIAS],
-                seller_username=item_row[SELLER_USERNAME_ALIAS],
+        items_to_return = []
+        for item_row in items_rows:
+            seller = await self._profiles_repo.get_profile_by_id(
+                id=item_row['seller_id'],
                 requested_user=requested_user,
             )
-            for item_row in items_rows
-        ]
+            
+            items_to_return.append(await self._get_item_from_db_record(
+                    item_row=item_row,
+                    slug=item_row[SLUG_ALIAS],
+                    seller_username=seller.username,
+                    requested_user=requested_user,
+            ))
+        return items_to_return
+            
 
     async def get_items_for_user_feed(
         self,
