@@ -9,7 +9,7 @@ env_var = os.environ
 # for the database connection url
 database_url = env_var['DATABASE_URL'].replace("postgres://", "postgresql://")
 
-engine = create_engine(database_url, echo=True)
+engine = create_engine(database_url, echo=False)
 
 user_insert_statement = text("""INSERT INTO users(username, email, salt, bio, hashed_password) VALUES(:username, :email, :salt, :bio, :hashed_password)""")
 select_last_user_id = text("""SELECT * FROM users ORDER BY id DESC LIMIT 1""")
@@ -20,6 +20,10 @@ comment_statement = text("""INSERT INTO comments(body, seller_id, item_id) VALUE
 letters = string.ascii_lowercase
 
 with engine.connect() as con:
+    con.execute("DELETE FROM comments")
+    con.execute("DELETE FROM items")
+    con.execute("DELETE FROM users")
+
     for i in range(100):
 
         random_username = ''.join(random.choice(letters) for i in range(10))
